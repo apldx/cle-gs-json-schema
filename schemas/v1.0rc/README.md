@@ -1,0 +1,122 @@
+# Overview
+
+# GatewaySeq JSON schema v1.0rc
+
+The GatewaySeq JSON file is written by the
+[workflow](https://github.com/dhslab/cle-gatewayseq), which additional
+data added by the reporting tool. This schema documents the format and
+can be also be used to validate the JSON as described
+[here](../README.md). When referring to the schema the following
+notation is used
+
+    .               Top level of the object
+    .key            Top-level key eg .title
+    .key1.key2      Top-level key and subkey eg .properties.CASEINFO
+    .required[1]    Array value 1 of top-level key .required
+
+Parts of the documentation below are auto-generated from the schema
+
+## Top-level keys
+
+Allowed top-level keys are
+
+- `CASEINFO` (Case information)
+
+- `VARIANTS` (SNVs and small indels)
+
+- `CNV` (Copy number variants)
+
+- `FUSIONS` (Gene fusions)
+
+- `MSI` (Microsatellite instability)
+
+- `TMB` (Tumor mutational burden)
+
+- `QC` (QC parameters and data)
+
+- `REPORTING` (Reporting data, including OncoKB annotation)
+
+All but `REPORTING` are required
+
+### `CASEINFO`
+
+Case information. Simple object of keys and values, with all keys
+required, possibly with value `NONE`
+
+### `VARIANTS`
+
+Requires two subkeys, `PASS` (variants passing filters) and `Filtered`
+(variants failing filters). Each of these follows the format specified
+by
+
+`.$defs.variantData`
+
+``` json
+{
+  "type": "object",
+  "required": [
+    "columns",
+    "data"
+  ],
+  "properties": {
+    "columns": {
+      "type": "array"
+    },
+    "data": {
+      "type": "array"
+    }
+  }
+}
+```
+
+`data` can be an empty array, which indicates no variants were called.
+
+### `CNV` and `FUSIONS`
+
+Can be `false` or contain variant data as in `VARIANTS`. If `false`,
+indicates that there was not enough data to make calls; the reason will
+be listed in the `.CASEINFO.exception` section of the JSON
+
+### `MSI` and `TMB`
+
+Can be `false` or a simple object of keys and values. If false, as in
+`CNV` and `FUSIONS` indicates that there was not enough data to make
+calls
+
+### `QC`
+
+Nested object of QC data and parameters (allowed values or ranges)
+
+## `REPORTING`
+
+This section is optional. It can be present in on of the following
+states
+
+### 1. `oncokb` added by workflow
+
+The workflow may query [OncoKB](https://www.oncokb.org/), creating
+`REPORTING` with a subkey of `oncokb` containing a nested object of
+OncoKB data
+
+### 2. `edits` added by reporting tool
+
+If the reporting tool adds anything to the JSON, it must also add a
+`.REPORTING.reportingVersion` field with the version of the reporting
+format.
+
+The reporting tool saves versions of reporting data under
+`.REPORTING.edits`. This is an array of reporting edits, with the most
+recent added to the front of the array (at element `0`). The edit format
+is specified by `.$defs.edit`.
+
+### 3. Final report added by reporting tool
+
+If the user chooses to save the final report, the following keys will be
+added under `.REPORTING`
+
+    reportingVersion (if not already present)
+    edits (at least one edit must be present)
+    version (version id of the edit used to generate the report)
+    amended (if a new report is being saved over an existing report, will be true, otherwise false)
+    text (text version of the report)
+    pdf (PDF version of the report as base64-encoded string)

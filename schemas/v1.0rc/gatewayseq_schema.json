@@ -1,0 +1,349 @@
+{
+  "title": "GatewaySeq JSON schema v1.0rc",
+  "type": "object",
+  "required": [
+    "CASEINFO",
+    "VARIANTS",
+    "CNV",
+    "FUSIONS",
+    "MSI",
+    "TMB",
+    "QC"
+  ],
+  "properties": {
+    "CASEINFO": {
+      "type": "object",
+      "description": "Case information",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Sample name"
+        },
+        "mrn": {
+          "type": "string",
+          "description": "MRN"
+        },
+        "DOB": {
+          "type": "string",
+          "description": "Date of birth as yyyy-mm-dd"
+        },
+        "accession": {
+          "type": "string",
+          "description": "Accession"
+        },
+        "specimen": {
+          "type": "string",
+          "description": "Specimen ID"
+        },
+        "casedir": {
+          "type": "string",
+          "description": "Case directory"
+        },
+        "maxaf": {
+          "type": "number",
+          "description": "Maximum population allele frequency"
+        },
+        "exception": {
+          "type": "string",
+          "description": "Case exceptions"
+        },
+        "run_info_str": {
+          "type": "string",
+          "description": "Run information"
+        },
+        "qcrange_file": {
+          "type": "string",
+          "description": "Path to QC ranges file"
+        },
+        "minvaf": {
+          "type": "number",
+          "description": "Minimum VAF to report variant"
+        },
+        "minreads": {
+          "type": "number",
+          "description": "Minimum alt reads to report variant"
+        },
+        "genefusions": {
+          "type": "string",
+          "description": "Path to gene fusions file"
+        },
+        "runid": {
+          "type": "string",
+          "description": "Run ID"
+        },
+        "instrument": {
+          "type": "string",
+          "description": "Instrument ID"
+        },
+        "spec": {
+          "type": "string",
+          "description": "?"
+        },
+        "flowcell": {
+          "type": "string",
+          "description": "Flowcell ID"
+        },
+        "date": {
+          "type": "string",
+          "description": "Run date as yyyy-mm-dd hh:mm:ss"
+        }
+      },
+      "required": [
+        "name",
+        "mrn",
+        "DOB",
+        "accession",
+        "specimen",
+        "casedir",
+        "maxaf",
+        "exception",
+        "run_info_str",
+        "qcrange_file",
+        "minvaf",
+        "minreads",
+        "genefusions",
+        "runid",
+        "instrument",
+        "spec",
+        "flowcell",
+        "date"
+      ],
+      "additionalProperties": false
+    },
+    "VARIANTS": {
+      "type": "object",
+      "description": "SNVs and small indels",
+      "required": [
+        "PASS",
+        "Filtered"
+      ],
+      "properties": {
+        "PASS": {
+          "$ref": "#/$defs/variantData"
+        },
+        "Filtered": {
+          "$ref": "#/$defs/variantData"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CNV": {
+      "description": "Copy number variants",
+      "anyOf": [
+        {
+          "type": "boolean",
+          "const": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "PASS",
+            "Filtered"
+          ],
+          "properties": {
+            "PASS": {
+              "$ref": "#/$defs/variantData"
+            },
+            "Filtered": {
+              "$ref": "#/$defs/variantData"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "FUSIONS": {
+      "description": "Gene fusions",
+      "anyOf": [
+        {
+          "type": "boolean",
+          "const": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "PASS"
+          ],
+          "properties": {
+            "PASS": {
+              "$ref": "#/$defs/variantData"
+            },
+            "Filtered": {
+              "$ref": "#/$defs/variantData"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "MSI": {
+      "description": "Microsatellite instability",
+      "$ref": "#/$defs/miscData"
+    },
+    "TMB": {
+      "description": "Tumor mutational burden",
+      "$ref": "#/$defs/miscData"
+    },
+    "QC": {
+      "type": "object",
+      "description": "QC parameters and data"
+    },
+    "REPORTING": {
+      "description": "Reporting data, including OncoKB annotation",
+      "$ref": "#/$defs/reporting"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "variantData": {
+      "type": "object",
+      "required": [
+        "columns",
+        "data"
+      ],
+      "properties": {
+        "columns": {
+          "type": "array"
+        },
+        "data": {
+          "type": "array"
+        }
+      }
+    },
+    "miscData": {
+      "anyOf": [
+        {
+          "type": "boolean",
+          "const": false
+        },
+        {
+          "type": "object"
+        }
+      ]
+    },
+    "reporting": {
+      "anyOf": [
+        {
+          "$comment": "Pipeline can optionally add oncokb",
+          "type": "object",
+          "required": [
+            "oncokb"
+          ],
+          "properties": {
+            "oncokb": {}
+          },
+          "additionalProperties": false
+        },
+        {
+          "$comment": "Reporter must add reportingVersion when adding edits",
+          "type": "object",
+          "required": [
+            "reportingVersion",
+            "edits"
+          ],
+          "properties": {
+            "reportingVersion": {
+              "type": "number"
+            },
+            "oncokb": {},
+            "edits": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/edit"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "$comment": "amended, pdf, text, version must all be present together along with edits",
+          "type": "object",
+          "required": [
+            "reportingVersion",
+            "edits",
+            "version",
+            "amended",
+            "text",
+            "pdf"
+          ],
+          "properties": {
+            "reportingVersion": {
+              "type": "number"
+            },
+            "oncokb": {},
+            "edits": {
+              "type": "array"
+            },
+            "version": {
+              "type": "integer"
+            },
+            "amended": {
+              "type": "boolean"
+            },
+            "text": {
+              "type": "string"
+            },
+            "pdf": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "edit": {
+      "type": "object",
+      "required": [
+        "version_id",
+        "case_data",
+        "variants"
+      ],
+      "properties": {
+        "version_id": {
+          "type": "integer"
+        },
+        "case_data": {},
+        "variants": {
+          "type": "object",
+          "required": [
+            "PASS",
+            "Filtered"
+          ],
+          "properties": {
+            "PASS": {
+              "type": "object",
+              "required": [
+                "significant",
+                "vus"
+              ],
+              "properties": {
+                "significant": {
+                  "type": "array"
+                },
+                "vus": {
+                  "type": "array"
+                }
+              }
+            },
+            "Filtered": {
+              "type": "object",
+              "required": [
+                "significant",
+                "vus"
+              ],
+              "properties": {
+                "significant": {
+                  "type": "array"
+                },
+                "vus": {
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  }
+}
