@@ -63,6 +63,10 @@
           "type": "number",
           "description": "Minimum alt reads to report variant"
         },
+        "maxsvlen": {
+          "type": "number",
+          "description": "Maximum SV length"
+        },
         "genefusions": {
           "type": "string",
           "description": "Path to gene fusions file"
@@ -101,6 +105,7 @@
         "qcrange_file",
         "minvaf",
         "minreads",
+        "maxsvlen",
         "genefusions",
         "runid",
         "instrument",
