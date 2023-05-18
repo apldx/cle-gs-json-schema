@@ -248,7 +248,7 @@
           ],
           "properties": {
             "reportingVersion": {
-              "type": "number"
+              "type": "string"
             },
             "oncokb": {},
             "edits": {
@@ -273,7 +273,7 @@
           ],
           "properties": {
             "reportingVersion": {
-              "type": "number"
+              "type": "string"
             },
             "oncokb": {},
             "edits": {
